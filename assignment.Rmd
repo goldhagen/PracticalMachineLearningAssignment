@@ -5,10 +5,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
-library(caret)
-training <- read.csv("../pml-training.csv")
-testing  <- read.csv("../pml-testing.csv")
 ```
 
 ## Summary
@@ -17,15 +13,49 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r, echo=FALSE}
+## Preprocessing
+
+```{r housekeeping, echo=TRUE}
+library(ggplot2)
+library(lattice)
+library(caret)
+
+draw     <- read.csv("../pml-training.csv")
+testing  <- read.csv("../pml-testing.csv")
+
+# removing row number (X) and timestamps (not doing time series analyses here)
+rc <- c("X","user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", "cvtd_timestamp")
+rc1 <- which(colnames(training) %in% rc)
+dclean <- draw[,-rc1]
+
+# removing features with near zero variance
+rc2 <- nearZeroVar(dclean)
+dclean <- dclean[,-rc2]
+
+# removing features with mostly (95%) NA (not addressed by nearZeroVar)
+rc3 <- which(colSums(is.na(dclean)) / nrow(dclean) > 0.95)
+dclean <- dclean[,-rc3]
+
+set.seed(12345)
+intrain <- createDataPartition(dclean$classe, p = .70, list = FALSE)
+dtrain <- dclean[intrain, ]
+dtest  <- dclean[-intrain, ]
 ```
 
-## Including Plots
+## Analyses
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r RandomForest, echo=TRUE}
+param <- trainControl(method="cv", 5)
+mod <- train(classe ~ ., data=dtrain, method="rf", trControl=param, ntree=200)
+pred <- predict(mod, dtest)
+confusionMatrix(dtest$classe, pred)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r, echo = FALSE}
+predict(mod, testing)
+```
+
