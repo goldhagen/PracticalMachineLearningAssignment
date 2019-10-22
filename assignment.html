@@ -450,7 +450,10 @@ mod</code></pre>
 ## 
 ## Accuracy was used to select the optimal model using the largest value.
 ## The final value used for the model was mtry = 27.</code></pre>
-<p>As can be seen from the table above, the accuracy of the optimal model is 99.69%. Given the large data set and k-fold cross-validation, we should expect a similar outcome with the final test set. And indeed, as can be seen below with the test set the accuracy is even slightly higher at 99.88%, and the lower 95% confidence interval boundary on the accuracy is 99.76%.</p>
+<p>As can be seen from the table above, the accuracy of the optimal model is 99.73%. 
+Given the large data set and k-fold cross-validation, we should expect a similar outcome with the final test set. 
+And indeed, as can be seen below with the test set the accuracy is even slightly higher at 99.9%, 
+and the lower 95% confidence interval boundary on the accuracy is 99.78%.</p>
 <pre class="r"><code>pred &lt;- predict(mod, dtest)
 confusionMatrix(dtest$classe, pred)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
